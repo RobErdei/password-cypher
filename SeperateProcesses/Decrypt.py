@@ -161,7 +161,7 @@ class DecryptPage:
             curSaltChars = saltChars[pas]
             pasWithoutSalt = self.removeSalt(newPas, curSaltChars)
         
-            DecryptedPasswordsSet.append([currentKeySet, curSaltChars, pasWithoutSalt])
+            DecryptedPasswordsSet.append([pasWithoutSalt, currentKeySet, curSaltChars])
         return DecryptedPasswordsSet
         
     def display_output(self, output_data):
@@ -170,7 +170,7 @@ class DecryptPage:
             widget.destroy()
 
         # Create new labels for the table headers
-        headers = ['Sequence', 'Salt', 'Dercrypted Password']
+        headers = ['Decrypted Password', 'Sequence', 'Salt']
         for c, header_text in enumerate(headers):
             header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
             header_label.grid(row=0, column=c, pady=10, padx=1)

@@ -162,7 +162,7 @@ class EncryptPage:
                 encdPas = self.Encrypt(saltedPas, seq)
                 newPas = encdPas
 
-            saltedPasswordsSet.append([origPas, saltedPas, salt, ''.join(sequences), newPas])
+            saltedPasswordsSet.append([origPas, saltedPas, newPas, ''.join(sequences), salt])
 
         return saltedPasswordsSet
 
@@ -172,7 +172,7 @@ class EncryptPage:
             widget.destroy()
 
         # Create new labels for the table headers
-        headers = ['Password', 'Salted Password', 'Salt', 'Key Set', 'Encrypted Password']
+        headers = ['Password', 'Salted Password', 'Encrypted Password', 'Key Set', 'Salt']
         for c, header_text in enumerate(headers):
             header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
             header_label.grid(row=0, column=c, pady=10, padx=1)

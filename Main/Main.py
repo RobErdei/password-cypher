@@ -6,7 +6,8 @@ import random
 import pandas as pd
 from pathlib import Path
 import csv
-
+import logging 
+from typing import Optional
 
 class MainHub(tk.Frame):
     def __init__(self, parent, controller):
@@ -36,9 +37,6 @@ class MainHub(tk.Frame):
 class EncryptPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        
-        
-        parent.bind_all("<<Paste>>", self.paste)
 
         self.controller = controller
         self.configure(bg='#74AA9C')
@@ -57,8 +55,18 @@ class EncryptPage(tk.Frame):
         self.content_frame = Frame(self, bg='#74AA9C')
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
+        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+
         self.create_table(2, 2, ['Password', 'Sequence'])
         self.create_buttons()
+
+    def on_visibility(self, visible):
+        if visible:
+            self.bind_all("<<Paste>>", self.paste)
+        else:
+            self.unbind_all("<<Paste>>")
 
     def create_table(self, rows, columns, head):
         self.table = []
@@ -102,6 +110,10 @@ class EncryptPage(tk.Frame):
             self.initial_table_structure['headers']
         )
 
+        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+
     def paste(self, event):
         # Access the clipboard from the widget that triggered the event
         widget = event.widget
@@ -136,7 +148,6 @@ class EncryptPage(tk.Frame):
                     else:
                         pass
 
-
     def get_table_info(self):
         row_items = []
         for r, row in enumerate(self.table):
@@ -148,14 +159,19 @@ class EncryptPage(tk.Frame):
         return row_items
 
     def process_data(self):
-        encrypted_data = self.encrypt_data()
-        self.display_output(encrypted_data)
+        keys_df = self.open_file_dialog()   # Prompts you to manually navigate to a CSV file to parse through for the keys
+        if keys_df is not None:
+            encrypted_data = self.encrypt_data(keys_df)
+            self.display_output(encrypted_data)
+        else:
+            # Handle the case where the CSV could not be loaded
+            print("Error loading the CSV file.")
 
-    def encrypt_data(self):
+    def encrypt_data(self, keys_df):
+        # Use keys_df directly in your encryption logic
+        # Example:
         table_info = self.get_table_info()
-        self.sourceCSV()
-        saltedPasswordsSet = []    #    The first entries are going to be encrypted
-        
+        saltedPasswordsSet = []
         for i in table_info:
             origPas = i[0]
             saltedSet = self.addSalt(i[0])
@@ -165,10 +181,10 @@ class EncryptPage(tk.Frame):
             sequences = self.SequenceBreak(i[1])
             newPas = ''
             for seq in sequences:
-                encdPas = self.Encrypt(saltedPas, seq)
+                encdPas = self.Encrypt(saltedPas, seq, keys_df)
                 newPas = encdPas
 
-            saltedPasswordsSet.append([origPas, saltedPas, salt, ''.join(sequences), newPas])
+            saltedPasswordsSet.append([origPas, saltedPas, newPas, ''.join(sequences), salt])
 
         return saltedPasswordsSet
 
@@ -178,7 +194,7 @@ class EncryptPage(tk.Frame):
             widget.destroy()
 
         # Create new labels for the table headers
-        headers = ['Password', 'Salted Password', 'Salt', 'Key Set', 'Encrypted Password']
+        headers = ['Password', 'Salted Password', 'Encrypted Password', 'Key Set', 'Salt']
         for c, header_text in enumerate(headers):
             header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
             header_label.grid(row=0, column=c, pady=10, padx=1)
@@ -196,6 +212,23 @@ class EncryptPage(tk.Frame):
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(headers)
                 csv_writer.writerows(output_data)
+
+    def open_file_dialog(self):
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if file_path:
+            dataFrame = self.read_csv(file_path)
+            return dataFrame
+
+    def read_csv(self, file_path):
+        try:
+            with open(file_path, 'r') as file:
+                read_file = pd.read_csv(file)
+                read_file.drop(columns=read_file.columns[0])
+                correctedReadFile = read_file.drop(columns=read_file.columns[0])
+                return correctedReadFile
+        except Exception as e:
+            print("Error reading CSV:", str(e))
+
 
     @staticmethod
     def SequenceBreak(string):  #Breaks up key set sequence string | a1b64c8 to ['a1', 'b64', 'c8']
@@ -217,13 +250,14 @@ class EncryptPage(tk.Frame):
         return result
     
     @staticmethod
-    def Encrypt(string,seq):
+    def Encrypt(string, seq, setDF):
         DefaultCharSet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','!','@','#','$','%','^','&','*','?','~','0','1','2','3','4','5','6','7','8','9']
         encryptedString = ''
 
         for char in string:
             defaultNum = DefaultCharSet.index(char)
-            set = reForm[seq].to_list()
+
+            set = setDF[seq].to_list()
             setNum = set[defaultNum]
             newChar = DefaultCharSet[setNum]
             encryptedString += str(newChar)
@@ -254,25 +288,18 @@ class EncryptPage(tk.Frame):
 
         return [salt, ''.join(newSet)]
     
-    @staticmethod
-    def sourceCSV():
-        main_path = Path(__file__).parent  # Get the directory
-        print(main_path)
-        keys = pd.read_csv('Key_Excel.csv')   #Reads CSV file
-        global reForm
-        reForm = keys.astype(int)
-
-        return reForm
-
-
-
 class DecryptPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+
         self.controller = controller
         self.configure(bg='#74AA9C')
 
-        parent.bind_all("<<Paste>>", self.paste)
+        self.initial_table_structure = {
+            'rows': 2,
+            'columns': 3,
+            'headers': ['Encrypted Password', 'Sequence', 'Salt']
+        }
 
         self.label_text = "Enter your strings, their sequence and their salt"
         self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#74AA9C')
@@ -281,8 +308,18 @@ class DecryptPage(tk.Frame):
         self.content_frame = Frame(self, bg='#74AA9C')
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
+        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+
         self.create_table(2, 3, ['Encrypted Password', 'Sequence', 'Salt'])
         self.create_buttons()
+
+    def on_visibility(self, visible):
+        if visible:
+            self.bind_all("<<Paste>>", self.paste)
+        else:
+            self.unbind_all("<<Paste>>")
 
     def create_table(self, rows, columns, head):
         self.table = []
@@ -301,16 +338,35 @@ class DecryptPage(tk.Frame):
                 row.append(var)
             self.table.append(row)
 
+    def reset_table(self):
+        # Clear the existing table content
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        # Recreate the table with the initial structure
+        self.create_table(
+            self.initial_table_structure['rows'],
+            self.initial_table_structure['columns'],
+            self.initial_table_structure['headers']
+        )
+
+        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+
     def create_buttons(self):
         decrypt_button_text = "Decrypt"
         self.decrypt_button = Button(self, text=decrypt_button_text, command=self.process_data, bg='#FFFDD0', width=20, height=10)
         self.decrypt_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
+        refresh_button = "Refresh"
+        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#FFFDD0', width=20, height=10)
+        self.other_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
+
         main_page_redirect_button = "Return to main page"
         self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#FFFDD0', width=20, height=10)
         self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
 
-    
     def paste(self, event):
         # Access the clipboard from the widget that triggered the event
         widget = event.widget
@@ -345,7 +401,6 @@ class DecryptPage(tk.Frame):
                     else:
                         pass
 
-
     def get_table_info(self):
         row_items = []
         for r, row in enumerate(self.table):
@@ -357,12 +412,16 @@ class DecryptPage(tk.Frame):
         return row_items
 
     def process_data(self):
-        decrypted_data = self.decrypt_data()
-        self.display_output(decrypted_data)
+        keys_df = self.open_file_dialog()   # All keys availible to user
+        if keys_df is not None:
+            encrypted_data = self.decrypt_data(keys_df)     # Runs decrypt algorithm with the key sets as an argument
+            self.display_output(encrypted_data)
+        else:
+            # Handle the case where the CSV could not be loaded
+            print("Error loading the CSV file.")
 
-    def decrypt_data(self):
+    def decrypt_data(self, setDF):
         table_info = self.get_table_info()
-        self.sourceCSV()
         
         saltedPas = [i[0] for i in table_info]
         keySets = [i[1] for i in table_info]
@@ -373,7 +432,7 @@ class DecryptPage(tk.Frame):
             currentKeySet = keySets[pas]
             newPas = pas
             for key in self.SequenceBreak(currentKeySet):
-                decrypted = self.Decrypt(saltedPas[pas], key)
+                decrypted = self.Decrypt(saltedPas[pas], key, setDF)
                 newPas = decrypted
             
             curSaltChars = saltChars[pas]
@@ -388,7 +447,7 @@ class DecryptPage(tk.Frame):
             widget.destroy()
 
         # Create new labels for the table headers
-        headers = ['Sequence', 'Salt', 'Dercrypted Password']
+        headers = ['Sequence', 'Salt', 'Decrypted Password']
         for c, header_text in enumerate(headers):
             header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
             header_label.grid(row=0, column=c, pady=10, padx=1)
@@ -408,6 +467,21 @@ class DecryptPage(tk.Frame):
                 csv_writer.writerow(headers)
                 csv_writer.writerows(output_data)
 
+    def open_file_dialog(self):     # Prompts user to choose csv that contains keys
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if file_path:
+            dataFrame = self.read_csv(file_path)    # Parses through CSV chosen
+            return dataFrame
+
+    def read_csv(self, file_path):  # CSV dataframe, gets returned as pandas DF
+        try:
+            with open(file_path, 'r') as file:
+                read_file = pd.read_csv(file)
+                read_file.drop(columns=read_file.columns[0])    # First column should be placeholder. Gets dropped due to BOM character excel creates
+                correctedReadFile = read_file.drop(columns=read_file.columns[0])
+                return correctedReadFile
+        except Exception as e:
+            print("Error reading CSV:", str(e))
 
 
     @staticmethod
@@ -430,13 +504,13 @@ class DecryptPage(tk.Frame):
         return result
 
     @staticmethod
-    def Decrypt(string,seq):
+    def Decrypt(string, seq, setDF):
         DefaultCharSet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','!','@','#','$','%','^','&','*','?','~','0','1','2','3','4','5','6','7','8','9']
         decryptedString = ''
 
         for char in string:
             defaultNum = DefaultCharSet.index(char)
-            set = reForm[seq].to_list()
+            set = setDF[seq].to_list()
             setNum = set.index(defaultNum)
             newChar = DefaultCharSet[setNum]
             decryptedString += str(newChar)
@@ -455,20 +529,11 @@ class DecryptPage(tk.Frame):
 
         return unsaltedPassword
 
-    @staticmethod
-    def sourceCSV():
-        main_path = Path(__file__).parent  # Get the directory
-        print(main_path)
-        keys = pd.read_csv('Key_Excel.csv')   #Reads CSV file
-        global reForm
-        reForm = keys.astype(int)
-
-        return reForm
-
 
 class MainApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        
         geometry = self.geometry("700x500")
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -486,6 +551,9 @@ class MainApp(tk.Tk):
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
+        if hasattr(frame, 'on_visibility'):
+            frame.on_visibility(True)  # Assuming the frame is now visible
+    # Optionally, call on_visibility(False) for the frame being hidde
 
 
 if __name__ == "__main__":
