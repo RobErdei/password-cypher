@@ -13,19 +13,20 @@ class MainHub(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.configure(bg='#74AA9C')
+        self.configure(bg='#799F93')
 
-        self.label_text = "Would you like to encrypt or decrypt?"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#74AA9C')
+        self.label_text = "What would you like to do?"
+        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=50, height=2)
         self.label.pack(padx=20, pady=20)
 
-        decrypt_button_text = "Decrypt"
-        self.decrypt_button = Button(self, text=decrypt_button_text, command=self.go_to_decrypt, bg='#FFFDD0', width=20, height=10)
-        self.decrypt_button.pack(padx=20, pady=20)
-
         encrypt_button_text = "Encrypt"
-        self.encrypt_button = Button(self, text=encrypt_button_text, command=self.go_to_encrypt, bg='#FFFDD0', width=20, height=10)
-        self.encrypt_button.pack(padx=20, pady=20)
+        self.encrypt_button = Button(self, text=encrypt_button_text, font=('', 15), command=self.go_to_encrypt, bg='#EA9A6A', width=25, height=5, borderwidth=4, relief="raised")
+        self.encrypt_button.pack(side=LEFT, padx=20, pady=20)
+
+        decrypt_button_text = "Decrypt"
+        self.decrypt_button = Button(self, text=decrypt_button_text, font=('', 15), command=self.go_to_decrypt, bg='#EA9A6A', width=25, height=5, borderwidth=4, relief="raised")
+        self.decrypt_button.pack(side=RIGHT, padx=20, pady=20)
+
 
     def go_to_decrypt(self):
         self.controller.show_frame(DecryptPage)
@@ -39,7 +40,7 @@ class EncryptPage(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.controller = controller
-        self.configure(bg='#74AA9C')
+        self.configure(bg='#799F93')
 
         # Initialize initial table structure
         self.initial_table_structure = {
@@ -49,14 +50,14 @@ class EncryptPage(tk.Frame):
         }
 
         self.label_text = "Enter your strings and their sequences"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#74AA9C')
+        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
-        self.content_frame = Frame(self, bg='#74AA9C')
+        self.content_frame = Frame(self, bg='#799F93')
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
         self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
-        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
         self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
 
         self.create_table(2, 2, ['Password', 'Sequence'])
@@ -73,7 +74,7 @@ class EncryptPage(tk.Frame):
 
         headers = head
         for c, header_text in enumerate(headers):
-            header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
+            header_label = Label(self.content_frame, text=header_text, bg='#4E6E64')
             header_label.grid(row=0, column=c, pady=10, padx=1)
 
         for r in range(1, rows + 1):
@@ -87,15 +88,15 @@ class EncryptPage(tk.Frame):
 
     def create_buttons(self):
         encrypt_button_text = "Encrypt"
-        self.encrypt_button = Button(self, text=encrypt_button_text, command=self.process_data, bg='#FFFDD0', width=20, height=10)
+        self.encrypt_button = Button(self, text=encrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.encrypt_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
         refresh_button = "Refresh"
-        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#FFFDD0', width=20, height=10)
+        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
 
         main_page_redirect_button = "Return to main page"
-        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#FFFDD0', width=20, height=10)
+        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
 
     def reset_table(self):
@@ -196,7 +197,7 @@ class EncryptPage(tk.Frame):
         # Create new labels for the table headers
         headers = ['Password', 'Salted Password', 'Encrypted Password', 'Key Set', 'Salt']
         for c, header_text in enumerate(headers):
-            header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
+            header_label = Label(self.content_frame, text=header_text, bg='#799F93')
             header_label.grid(row=0, column=c, pady=10, padx=1)
 
         # Populate the table with output data
@@ -293,7 +294,7 @@ class DecryptPage(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.controller = controller
-        self.configure(bg='#74AA9C')
+        self.configure(bg='#799F93')
 
         self.initial_table_structure = {
             'rows': 2,
@@ -302,14 +303,14 @@ class DecryptPage(tk.Frame):
         }
 
         self.label_text = "Enter your strings, their sequence and their salt"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#74AA9C')
+        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
-        self.content_frame = Frame(self, bg='#74AA9C')
+        self.content_frame = Frame(self, bg='#799F93')
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
         self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
-        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", variable=self.export_to_csv_var)
+        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
         self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
 
         self.create_table(2, 3, ['Encrypted Password', 'Sequence', 'Salt'])
@@ -326,7 +327,7 @@ class DecryptPage(tk.Frame):
 
         headers = head
         for c, header_text in enumerate(headers):
-            header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
+            header_label = Label(self.content_frame, text=header_text, bg='#4E6E64')
             header_label.grid(row=0, column=c, pady=10, padx=1)
 
         for r in range(1, rows + 1):
@@ -356,15 +357,15 @@ class DecryptPage(tk.Frame):
 
     def create_buttons(self):
         decrypt_button_text = "Decrypt"
-        self.decrypt_button = Button(self, text=decrypt_button_text, command=self.process_data, bg='#FFFDD0', width=20, height=10)
+        self.decrypt_button = Button(self, text=decrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.decrypt_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
         refresh_button = "Refresh"
-        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#FFFDD0', width=20, height=10)
+        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
 
         main_page_redirect_button = "Return to main page"
-        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#FFFDD0', width=20, height=10)
+        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
 
     def paste(self, event):
@@ -449,7 +450,7 @@ class DecryptPage(tk.Frame):
         # Create new labels for the table headers
         headers = ['Sequence', 'Salt', 'Decrypted Password']
         for c, header_text in enumerate(headers):
-            header_label = Label(self.content_frame, text=header_text, bg='#74AA9C')
+            header_label = Label(self.content_frame, text=header_text, bg='#799F93')
             header_label.grid(row=0, column=c, pady=10, padx=1)
 
         # Populate the table with output data
