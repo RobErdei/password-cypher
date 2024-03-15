@@ -1,32 +1,48 @@
-import tkinter as tk
-from tkinter import filedialog
-import csv
+import random
+from random import shuffle
+import pandas as pd
 
-class CSVReaderApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("CSV Reader App")
-        self.geometry("400x200")
+def generate_keys(charSet, countPerChar):
+    baseNumSet = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
+    # ^Represents int versions of all legal characters allowed in the cypher
+    
+    keySets = []
 
-        self.label = tk.Label(self, text="Click here to select a CSV file")
-        self.label.pack(pady=20)
-        self.label.bind("<Button-1>", self.open_file_dialog)
+    for char in charSet:
+        keys = []
+        for _ in range(countPerChar):
+            shuffle(baseNumSet)
+            new_key = tuple(baseNumSet)
 
-    def open_file_dialog(self, event):
-        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-        if file_path:
-            self.read_csv(file_path)
+            while new_key in keys:  # Checks if randomized key is unique and not apart of the keySets list. Continues to randomize until it's not
+                shuffle(baseNumSet)
+                new_key = tuple(baseNumSet)
+                
+            keys.append(new_key)
+        
+        for i, key in enumerate(keys):
+            columnName = char + str(i)
+            keySets.append(pd.Series(key, name=columnName))
 
-    def read_csv(self, file_path):
-        try:
-            with open(file_path, 'r') as file:
-                reader = csv.reader(file)
-                # Example: printing the content of the CSV file
-                for row in reader:
-                    print(row)
-        except Exception as e:
-            print("Error reading CSV:", str(e))
+    keySets = pd.concat(keySets, axis=1)
+    keySets.index = ['placeholder'] * len(keySets)
+    keySets.index.name = 'placeholder'
+    print("Done")
+    return keySets
 
-if __name__ == "__main__":
-    app = CSVReaderApp()
-    app.mainloop()
+def randomize_created_keys(keySet, count, amount):   # Randomizes order of keys by count of keys used and amount of sequences created
+        # ^keySet is the list of all keys in data frame
+        sequenceSet = []
+        
+        for seqSet in range(amount):   # For each sequence
+            randomSequence = random.sample(keySet, count)
+            sequenceSet.append(''.join(randomSequence))
+        
+        return sequenceSet
+
+df = generate_keys('BACTVQRU', 6)
+
+column_headers = df.columns.tolist()
+print(column_headers)
+
+print(randomize_created_keys(column_headers, 7, 4))

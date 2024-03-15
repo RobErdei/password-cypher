@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog
 import secrets
 import random
+from random import shuffle
 import pandas as pd
 from pathlib import Path
 import csv
@@ -33,7 +34,7 @@ class MainHub(tk.Frame):
 
 
     def go_to_GenerateKeys(self):   # In progress
-        pass
+        self.controller.show_frame(GenerateKeysApp)
 
     def go_to_Decrypt(self):
         self.controller.show_frame(DecryptPage)
@@ -580,6 +581,75 @@ class DecryptPage(tk.Frame):
 
         return unsaltedPassword
 
+class GenerateKeysApp(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+        self.configure(bg='#799F93')
+
+        self.label_text = "Generate a sequence!"
+        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
+        self.label.grid(row=0, column=0, columnspan=3, pady=10)
+
+    @staticmethod
+    def randomize_created_keys(keySet, count, amount):   # Randomizes order of keys by count of keys used and amount of sequences created
+        # ^keySet is the list of all keys in data frame
+        sequenceSet = []
+        
+        for seqSet in range(amount):   # For each sequence
+            randomSequence = random.sample(keySet, count)
+            sequenceSet.append(''.join(randomSequence))
+        
+        return sequenceSet
+    @staticmethod
+    def generate_keys(charSet, countPerChar):
+        baseNumSet = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
+        # ^Represents int versions of all legal characters allowed in the cypher
+        
+        keySets = []
+
+        for char in charSet:
+            keys = []
+            for _ in range(countPerChar):
+                shuffle(baseNumSet)
+                new_key = tuple(baseNumSet)
+
+                while new_key in keys:  # Checks if randomized key is unique and not apart of the keySets list. Continues to randomize until it's not
+                    shuffle(baseNumSet)
+                    new_key = tuple(baseNumSet)
+                    
+                keys.append(new_key)
+            
+            for i, key in enumerate(keys):
+                columnName = char + str(i)
+                keySets.append(pd.Series(key, name=columnName))
+
+        keySets = pd.concat(keySets, axis=1)
+        keySets.index = ['placeholder'] * len(keySets)
+        keySets.index.name = 'placeholder'
+
+        return keySets
+
+    @staticmethod
+    def SequenceBreak(string):  #Breaks up key set sequence string | a1b64c8 to ['a1', 'b64', 'c8']
+        result = []
+        current = ''
+
+        for char in string:
+            if char.isalpha():  #If character is a letter
+                if current:
+                    result.append(current)      #Appends the current string in the queue to the result set as a key set
+                    current = char              #Resets current queue
+                else:
+                    current += char
+            else:
+                current += char
+        if current:
+            result.append(current)
+
+        return result
+
 class MainApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -592,7 +662,7 @@ class MainApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (MainHub, DecryptPage, EncryptPage):
+        for F in (GenerateKeysApp, MainHub, DecryptPage, EncryptPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
