@@ -51,7 +51,7 @@ class EncryptPage(tk.Frame):
 
         # Initialize initial table structure
         self.initial_table_structure = {
-            'rows': 2,
+            'rows': 1,
             'columns': 2,
             'headers': ['Password', 'Sequence']
         }
@@ -67,7 +67,7 @@ class EncryptPage(tk.Frame):
         self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
         self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
 
-        self.create_table(2, 2, ['Password', 'Sequence'])
+        self.create_table(1, 2, ['Password', 'Sequence'])
         self.create_buttons()
 
     def on_visibility(self, visible):
@@ -332,7 +332,7 @@ class DecryptPage(tk.Frame):
         self.configure(bg='#799F93')
 
         self.initial_table_structure = {
-            'rows': 2,
+            'rows': 1,
             'columns': 3,
             'headers': ['Encrypted Password', 'Sequence', 'Salt']
         }
@@ -348,7 +348,7 @@ class DecryptPage(tk.Frame):
         self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
         self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
 
-        self.create_table(2, 3, ['Encrypted Password', 'Sequence', 'Salt'])
+        self.create_table(1, 3, ['Encrypted Password', 'Sequence', 'Salt']) # Change to 1 row as empty rows create an error
         self.create_buttons()
 
     def on_visibility(self, visible):
@@ -485,7 +485,7 @@ class DecryptPage(tk.Frame):
             
             curSaltChars = saltChars[pas]
             pasWithoutSalt = self.removeSalt(newPas, curSaltChars)
-        
+
             DecryptedPasswordsSet.append([currentKeySet, curSaltChars, pasWithoutSalt])
         return DecryptedPasswordsSet
         
@@ -592,18 +592,164 @@ class GenerateKeysApp(tk.Frame):
         self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
-    @staticmethod
-    def randomize_created_keys(keySet, count, amount):   # Randomizes order of keys by count of keys used and amount of sequences created
-        # ^keySet is the list of all keys in data frame
-        sequenceSet = []
+        # Create frame for valid characters so they can be packed into a single grid cell
+        self.valid_char_frame_setup()
+
+        # Create frame for Generate Set input values so they can be in a single grid cell
+        self.generate_tab_frame = Frame(self, bg='#799F93')
+        self.generate_tab_frame.grid(row=1, column=1, padx=10, pady=10, sticky="e")
+        self.genTable = self.create_table(self.generate_tab_frame, 1, 2, ['Characters', 'Number of Sets'])
+
+        self.randomize_tab_frame = Frame(self, bg='#799F93')
+        self.randomize_tab_frame.grid(row=2, column=1, padx=10, pady=10, sticky="e")
+        self.randTable = self.create_table(self.randomize_tab_frame, 1, 2, ['Sequences to be Generated', 'Amount of Keys to Use'])
+
+        self.create_buttons()
+
+    def create_buttons(self):
+        generate_key_set = "Generate Key Set"
+        self.generate_key_button = Button(self, text=generate_key_set, command=self.Generate_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.generate_key_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
+
+        randomize_sets = "Randomize Sets Into\nSequences"
+        self.randomize_sets_button = Button(self, text=randomize_sets, command=self.Randomize_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.randomize_sets_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
+
+        refresh_button = "Refresh"
+        self.other_button = Button(self, text=refresh_button, command=self.Refresh_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
+
+        main_page_redirect_button = "Return to main page"
+        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button.grid(row=4, column=2, padx=10, pady=10, sticky="e")
+
+    def Refresh_Button_Action(self):
+        for widget in self.randomize_output_frame.winfo_children():
+            widget.destroy()
+
+
+    def Generate_Button_Action(self):
+        input = self.get_table_info(self.genTable)
+        charset = str(input[0])
+        count = int(input[1])
+        keySets = self.generate_keys(charset, count)
         
-        for seqSet in range(amount):   # For each sequence
-            randomSequence = random.sample(keySet, count)
-            sequenceSet.append(''.join(randomSequence))
-        
-        return sequenceSet
+        csv_file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+
+        if csv_file_path:
+            keySets.to_csv(csv_file_path)
+        else:
+            pass
+
+    def Randomize_Button_Action(self):
+        keySets = self.process_existing_keys()
+        list = self.SequenceBreak(''.join(keySets))
+
+        input = self.get_table_info(self.randTable)
+
+        try:
+            amt = int(input[0])     # Amount of sequences to be generated
+            count = int(input[1])   # Amount of keys to be selected in each randomization
+
+            randomizedList = self.randomize_created_keys(list, amt, count)
+
+            self.randomize_output_frame = Frame(self, bg='#799F93')
+            self.randomize_output_frame.grid(row=2, column=0, padx=10, pady=10, sticky="e")
+
+            # Create a header for the table
+            header_label = Label(self.randomize_output_frame, text='Sequences', font=('', 10), bg='#3A5048', fg='#BDD0CB', relief="raised")
+            header_label.grid(row=0, column=0, pady=10, padx=1)
+
+            # Iterate over randomizedList to populate the table
+            for r, value in enumerate(randomizedList, start=1):
+                label = Label(self.randomize_output_frame, text=value)
+                label.grid(row=r, column=0, pady=1, padx=1, ipady=4)
+            
+            output = '\t\n'.join(randomizedList)
+
+            copy_btn = Button(self.randomize_output_frame, text="Copy to Clipboard", command=lambda value=output: self.copy_to_clipboard(output))
+            copy_btn.grid(row=0, column=1, pady=1, padx=30)
+
+        except Exception as e:
+            print("Error:", str(e))
+
+    def valid_char_frame_setup(self):
+        self.char_container = Frame(self, bg='#799F93')
+        self.char_container.grid(row=1, column=0, padx=0, pady=(0, 10))
+
+        self.valid_characters_label = Label(self.char_container, text="Valid Characters:", font=('', 12, 'bold'), bg='#BDD0CB', relief="raised")
+        self.valid_characters_label.pack(side=TOP, fill=X)
+
+        valid_characters = 'a b c d e f g h i j k l m\nn o p q r s t u v w x y z\nA B C D E F G H I J K L M\nN O P Q R S T U V W X Y Z'
+        self.val_char_box = Text(self.char_container, bg='#BDD0CB', height=4, width=25)
+        self.val_char_box.pack(side=BOTTOM, fill=X, pady=5)
+        self.val_char_box.insert(tk.END, valid_characters)
+
+    def copy_to_clipboard(self, text):
+        self.clipboard_clear()  # Clear the clipboard
+        self.clipboard_append(text)  # Append new text to the clipboard
+
+    def create_table(self, root, rows, columns, head):
+        table = []
+
+        headers = head
+        for c, header_text in enumerate(headers):
+            header_label = Label(root, text=header_text, font=('', 10), bg='#3A5048', fg='#BDD0CB', relief="raised")
+            header_label.grid(row=0, column=c, pady=10, padx=1)
+
+        for r in range(1, rows + 1):
+            row = []
+            for c in range(columns):
+                var = StringVar()
+                entry = Entry(root, textvar=var)
+                entry.grid(row=r, column=c, pady=1, padx=1, ipady=4)
+                row.append(var)
+            table.append(row)
+        return table
+
+    def get_table_info(self, table):
+        row_items = []
+
+        for r, row in enumerate(table):
+            row_val = []
+            for c, var in enumerate(row):
+                value = var.get()
+                row_val.append(value)
+            row_items.append(row_val)
+
+        return row_items[0]
+
+    def process_existing_keys(self):
+        keys_df = self.open_file_dialog()   # Prompts you to manually navigate to a CSV file to parse through for the keys
+        if keys_df is not None:
+            keySets = []
+            for header in keys_df:
+                keySets.append(header)
+            return keySets
+        else:
+            # Handle the case where the CSV could not be loaded
+            print("Error loading the CSV file.")
+
+    def open_file_dialog(self):
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if file_path:
+            dataFrame = self.read_csv(file_path)
+            return dataFrame
+
+    def read_csv(self, file_path):
+        try:
+            with open(file_path, 'r') as file:
+                read_file = pd.read_csv(file)
+                read_file.drop(columns=read_file.columns[0])
+                correctedReadFile = read_file.drop(columns=read_file.columns[0])
+                return correctedReadFile
+        except Exception as e:
+            print("Error reading CSV:", str(e))
+
+
     @staticmethod
-    def generate_keys(charSet, countPerChar):
+    def generate_keys(charSet, countPerChar):   # takes string, int
+        charSet = ''.join(dict.fromkeys(charSet))   # Converts to dict to remove duplicates then converts back to string
         baseNumSet = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
         # ^Represents int versions of all legal characters allowed in the cypher
         
@@ -631,6 +777,21 @@ class GenerateKeysApp(tk.Frame):
 
         return keySets
 
+    @staticmethod
+    def randomize_created_keys(keySet, amount=1, count=None):   # Randomizes order of keys by count of keys used and amount of sequences created
+        # ^keySet is the list of all keys in data frame
+        sequenceSet = []
+
+        if count is None:
+            count = len(keySet)
+        
+        for seqSet in range(amount):   # For each sequence
+            randomSequence = random.sample(keySet, count)
+            random.shuffle(randomSequence)
+            sequenceSet.append(''.join(randomSequence))
+        
+        return sequenceSet
+    
     @staticmethod
     def SequenceBreak(string):  #Breaks up key set sequence string | a1b64c8 to ['a1', 'b64', 'c8']
         result = []
