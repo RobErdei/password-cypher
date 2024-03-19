@@ -49,7 +49,15 @@ class EncryptPage(tk.Frame):
         self.controller = controller
         self.configure(bg='#799F93')
 
-        # Initialize initial table structure
+        self.base_window()
+
+    def base_window(self):
+        self.static_frame = tk.Frame(self, bg='#799F93')
+        self.static_frame.pack(side='right', fill='x', pady=(10, 0))
+
+        self.dynamic_frame = tk.Frame(self, bg='#799F93')
+        self.dynamic_frame.pack(side='top', fill='both', expand=True)
+
         self.initial_table_structure = {
             'rows': 1,
             'columns': 2,
@@ -57,13 +65,13 @@ class EncryptPage(tk.Frame):
         }
 
         self.label_text = "Enter your strings and their sequences"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
+        self.label = Label(self.dynamic_frame, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
-        self.content_frame = Frame(self, bg='#799F93')
+        self.content_frame = Frame(self.dynamic_frame, bg='#799F93')    # The frame that establishes the grid the input table is in
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
-        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
+        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox. Set in the same grid as the input table
         self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
         self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
 
@@ -101,38 +109,23 @@ class EncryptPage(tk.Frame):
 
     def create_buttons(self):
         encrypt_button_text = "Encrypt"
-        self.encrypt_button = Button(self, text=encrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.encrypt_button = Button(self.static_frame, text=encrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.encrypt_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
         refresh_button = "Refresh"
-        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button = Button(self.static_frame, text=refresh_button, command=self.reset_table, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
 
         main_page_redirect_button = "Return to main page"
-        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button = Button(self.static_frame, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
 
     def reset_table(self):
         # Clear the existing table content
-        for widget in self.content_frame.winfo_children():
+        for widget in self.winfo_children():
             widget.destroy()
 
-        desired_width = 800
-        desired_height = 650  
-        
-        root = self.controller
-        root.geometry(f'{desired_width}x{desired_height}')
-
-        # Recreate the table with the initial structure
-        self.create_table(
-            self.initial_table_structure['rows'],
-            self.initial_table_structure['columns'],
-            self.initial_table_structure['headers']
-        )
-
-        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
-        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
-        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+        self.base_window()
 
     def paste(self, event):
         # Access the clipboard from the widget that triggered the event
@@ -220,13 +213,8 @@ class EncryptPage(tk.Frame):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
-        desired_width = 1060
-        desired_height = 650  
-        root = self.controller
-        root.geometry(f'{desired_width}x{desired_height}')
-
         # Create new labels for the table headers
-        headers = ['Encrypted Password', 'Key Set', 'Salt']
+        headers = ['Encrypted Password', 'Sequence', 'Salt']
         for c, header_text in enumerate(headers):
             header_label = Label(self.content_frame, text=header_text, font=('', 10), bg='#3A5048', fg='#BDD0CB', relief="raised")
             header_label.grid(row=0, column=c, pady=10, padx=1)
@@ -234,7 +222,7 @@ class EncryptPage(tk.Frame):
         # Populate the table with output data
         for r, row_data in enumerate(output_data, start=1):
             for c, value in enumerate(row_data, start=0):
-                if c < 2:  # Check if the current column is one of the first two columns
+                if c < 1:  # Check if the current column is one of the first two columns
                     masked_value = '*' * len(value)  # Replace the actual value with asterisks
                     label = Label(self.content_frame, text=masked_value)
                 else: 
@@ -331,6 +319,17 @@ class DecryptPage(tk.Frame):
         self.controller = controller
         self.configure(bg='#799F93')
 
+        
+
+        self.base_window()
+
+    def base_window(self):
+        self.static_frame = tk.Frame(self, bg='#799F93')
+        self.static_frame.pack(side='right', fill='x', pady=(10, 0))
+
+        self.dynamic_frame = tk.Frame(self, bg='#799F93')
+        self.dynamic_frame.pack(side='top', fill='both', expand=True)
+
         self.initial_table_structure = {
             'rows': 1,
             'columns': 3,
@@ -338,10 +337,10 @@ class DecryptPage(tk.Frame):
         }
 
         self.label_text = "Enter your strings, their sequence and their salt"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
+        self.label = Label(self.dynamic_frame, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
-        self.content_frame = Frame(self, bg='#799F93')
+        self.content_frame = Frame(self.dynamic_frame, bg='#799F93')
         self.content_frame.grid(row=1, column=0, columnspan=2)
 
         self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
@@ -379,33 +378,24 @@ class DecryptPage(tk.Frame):
                 row.append(var)
             self.table.append(row)
 
-    def reset_table(self):
+    def reset_window(self):
         # Clear the existing table content
-        for widget in self.content_frame.winfo_children():
+        for widget in self.winfo_children():
             widget.destroy()
-
-        # Recreate the table with the initial structure
-        self.create_table(
-            self.initial_table_structure['rows'],
-            self.initial_table_structure['columns'],
-            self.initial_table_structure['headers']
-        )
-
-        self.export_to_csv_var = tk.IntVar()  # Create a tkinter variable to hold the state of the checkbox
-        self.export_to_csv_checkbox = tk.Checkbutton(self.content_frame, text="Export to CSV", bg='#799F93', variable=self.export_to_csv_var, borderwidth=2, relief="sunken")
-        self.export_to_csv_checkbox.grid(row=0, column=6, padx=10, pady=10, sticky="w")
+        
+        self.base_window()
 
     def create_buttons(self):
         decrypt_button_text = "Decrypt"
-        self.decrypt_button = Button(self, text=decrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.decrypt_button = Button(self.static_frame, text=decrypt_button_text, command=self.process_data, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.decrypt_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
 
         refresh_button = "Refresh"
-        self.other_button = Button(self, text=refresh_button, command=self.reset_table, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button = Button(self.static_frame, text=refresh_button, command=self.reset_window, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
 
         main_page_redirect_button = "Return to main page"
-        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button = Button(self.static_frame, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
         self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
 
     def paste(self, event):
@@ -491,13 +481,13 @@ class DecryptPage(tk.Frame):
         
     def display_output(self, output_data):
         # Clear the existing table
-        for widget in self.content_frame.winfo_children():
+        for widget in self.dynamic_frame.winfo_children():
             widget.destroy()
 
         # Create new labels for the table headers
         headers = ['Sequence', ' Salt ', 'Decrypted Password']
         for c, header_text in enumerate(headers):
-            header_label = Label(self.content_frame, text=header_text, font=('', 10), bg='#3A5048', fg='#BDD0CB', relief="raised")
+            header_label = Label(self.dynamic_frame, text=header_text, font=('', 10), bg='#3A5048', fg='#BDD0CB', relief="raised")
             header_label.grid(row=0, column=c, pady=10, padx=1)
 
         # Populate the table with output data
@@ -505,9 +495,9 @@ class DecryptPage(tk.Frame):
             for c, value in enumerate(row_data, start=0):
                 if c > 1:  # Check if the current column is one of the first two columns
                     masked_value = '*' * len(value)  # Replace the actual value with asterisks
-                    label = Label(self.content_frame, text=masked_value)
+                    label = Label(self.dynamic_frame, text=masked_value)
                 else: 
-                    label = Label(self.content_frame, text=value)
+                    label = Label(self.dynamic_frame, text=value)
                 label.grid(row=r, column=c, pady=1, padx=1, ipady=4)
 
         
@@ -588,45 +578,55 @@ class GenerateKeysApp(tk.Frame):
         self.controller = controller
         self.configure(bg='#799F93')
 
+        self.static_frame = tk.Frame(self, bg='#799F93')
+        self.static_frame.pack(side='right', fill='x', pady=(10, 0))
+
+        self.dynamic_frame = tk.Frame(self, bg='#799F93')
+        self.dynamic_frame.pack(fill='both', expand=True)
+
+        self.base_window()
+
+    def create_buttons(self):
+        generate_key_set = "Generate Key Set"
+        self.generate_key_button = Button(self.static_frame, text=generate_key_set, command=self.Generate_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.generate_key_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
+
+        randomize_sets = "Randomize Sets Into\nSequences"
+        self.randomize_sets_button = Button(self.static_frame, text=randomize_sets, command=self.Randomize_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.randomize_sets_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
+
+        refresh_button = "Refresh"
+        self.other_button = Button(self.static_frame, text=refresh_button, command=self.Refresh_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
+
+        main_page_redirect_button = "Return to main page"
+        self.other_button = Button(self.static_frame, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
+        self.other_button.grid(row=4, column=2, padx=10, pady=10, sticky="e")
+
+    def Refresh_Button_Action(self):
+        for widget in self.dynamic_frame.winfo_children():
+            widget.destroy()
+
+        self.base_window()
+
+    def base_window(self):
         self.label_text = "Generate a sequence!"
-        self.label = Label(self, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
+        self.label = Label(self.dynamic_frame, text=self.label_text, font=('', 20, 'bold'), bg='#3A5048', fg='#BDD0CB', borderwidth=2, relief="raised", width=40)
         self.label.grid(row=0, column=0, columnspan=3, pady=10)
 
         # Create frame for valid characters so they can be packed into a single grid cell
         self.valid_char_frame_setup()
 
         # Create frame for Generate Set input values so they can be in a single grid cell
-        self.generate_tab_frame = Frame(self, bg='#799F93')
+        self.generate_tab_frame = Frame(self.dynamic_frame, bg='#799F93')
         self.generate_tab_frame.grid(row=1, column=1, padx=10, pady=10, sticky="e")
         self.genTable = self.create_table(self.generate_tab_frame, 1, 2, ['Characters', 'Number of Sets'])
 
-        self.randomize_tab_frame = Frame(self, bg='#799F93')
+        self.randomize_tab_frame = Frame(self.dynamic_frame, bg='#799F93')
         self.randomize_tab_frame.grid(row=2, column=1, padx=10, pady=10, sticky="e")
         self.randTable = self.create_table(self.randomize_tab_frame, 1, 2, ['Sequences to be Generated', 'Amount of Keys to Use'])
 
         self.create_buttons()
-
-    def create_buttons(self):
-        generate_key_set = "Generate Key Set"
-        self.generate_key_button = Button(self, text=generate_key_set, command=self.Generate_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
-        self.generate_key_button.grid(row=1, column=2, padx=10, pady=10, sticky="e")
-
-        randomize_sets = "Randomize Sets Into\nSequences"
-        self.randomize_sets_button = Button(self, text=randomize_sets, command=self.Randomize_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
-        self.randomize_sets_button.grid(row=2, column=2, padx=10, pady=10, sticky="e")
-
-        refresh_button = "Refresh"
-        self.other_button = Button(self, text=refresh_button, command=self.Refresh_Button_Action, bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
-        self.other_button.grid(row=3, column=2, padx=10, pady=10, sticky="e")
-
-        main_page_redirect_button = "Return to main page"
-        self.other_button = Button(self, text=main_page_redirect_button, command=lambda: self.controller.show_frame(MainHub), bg='#EA9A6A', width=20, height=10, borderwidth=4, relief="raised")
-        self.other_button.grid(row=4, column=2, padx=10, pady=10, sticky="e")
-
-    def Refresh_Button_Action(self):
-        for widget in self.randomize_output_frame.winfo_children():
-            widget.destroy()
-
 
     def Generate_Button_Action(self):
         input = self.get_table_info(self.genTable)
@@ -653,7 +653,7 @@ class GenerateKeysApp(tk.Frame):
 
             randomizedList = self.randomize_created_keys(list, amt, count)
 
-            self.randomize_output_frame = Frame(self, bg='#799F93')
+            self.randomize_output_frame = Frame(self.dynamic_frame, bg='#799F93')
             self.randomize_output_frame.grid(row=2, column=0, padx=10, pady=10, sticky="e")
 
             # Create a header for the table
@@ -674,7 +674,7 @@ class GenerateKeysApp(tk.Frame):
             print("Error:", str(e))
 
     def valid_char_frame_setup(self):
-        self.char_container = Frame(self, bg='#799F93')
+        self.char_container = Frame(self.dynamic_frame, bg='#799F93')
         self.char_container.grid(row=1, column=0, padx=0, pady=(0, 10))
 
         self.valid_characters_label = Label(self.char_container, text="Valid Characters:", font=('', 12, 'bold'), bg='#BDD0CB', relief="raised")
