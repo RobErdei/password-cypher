@@ -9,18 +9,16 @@ This part of the application randomizes a list of 72 integers (one for each vali
 ![image](https://github.com/RobErdei/password-cypher/assets/91911762/250f6566-620e-4150-93eb-f87097bb7f95)
  
 ## Generating Key Sets:
--To generate these key sets, enter in any of the alphabetical letters displayed in the “Valid Characters” box and the number of sets for each character you would like created
--If you only want 2 sets created for the characters “ABC”, the CSV output would have 6 columns in total with the headers being A0, A1, B0, B1, C0 and C1 with each column having a uniquely randomized order of integer placements (character reassignments).
+To generate these key sets, enter in any of the alphabetical letters displayed in the “Valid Characters” box and the number of sets for each character you would like created. If you only want 2 sets created for the characters “ABC”, the CSV output would have 6 columns in total with the headers being A0, A1, B0, B1, C0 and C1 with each column having a uniquely randomized order of integer placements (character reassignments).
 ## Randomizing Existing sets
--Enter the number of sequences (an order of key sets as a single string) to be created and the number of keys to be randomly selected from the input. Both input values for this part of the page are **integer values only**.
--This functionality will request for you to upload a csv in the same format/layout as the one that is generated.
--Example Input:
-    + Sequences to be generated: 3
-    + Number of Keys to Use: 2
--Example Output:
-    + A1B1
-    + C1A0
-    + A0B0
+Enter the number of sequences (an order of key sets as a single string) to be created and the number of keys to be randomly selected from the input. Both input values for this part of the page are **integer values only**. This functionality will request for you to upload a csv in the same format/layout as the one that is generated.
+### Example Input:
+- Sequences to be generated: 3
+- Number of Keys to Use: 2
+### Example Output:
+- A1B1
+- C1A0
+- A0B0
 
 # Encrypting
 The Encryption technique used in this application is a variation of the polygraphic cipher and the permutation cipher in that an inputted string of characters is passed through one or more sets of integer keys that reassign that character’s positional values to the location of that character in the new set(s).
@@ -28,9 +26,9 @@ The Encryption technique used in this application is a variation of the polygrap
 ![image](https://github.com/RobErdei/password-cypher/assets/91911762/3da08acb-1a7b-4071-89d7-1b87ac9f80eb)
  
 ## Password Requirements:
--Strings that need to be less than 30 characters in length
--Cannot contain spaces
--Need to contain characters from the allowed characters table below:
+ + Strings that need to be less than 30 characters in length
+ + Cannot contain spaces
+ + Need to contain characters from the allowed characters table below:
 
 ![image](https://github.com/RobErdei/password-cypher/assets/91911762/ff104d6e-d4ed-4e2f-ab76-8247a58e11b7)
 
