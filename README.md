@@ -60,6 +60,6 @@ The decryption process works similarly to the encryption process with the key di
 ## Output:
 - The output view consists of the inputted sequences, salt strings and their respective decrypted password strings
 
-- ![image](https://github.com/RobErdei/password-cypher/assets/91911762/d99c9d8f-6e17-4cbf-a16b-85ec930744ac)
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/d99c9d8f-6e17-4cbf-a16b-85ec930744ac)
 
  
