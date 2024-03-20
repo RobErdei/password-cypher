@@ -1,5 +1,5 @@
 This is a TKinter application intended to provide users with a way to safely store passwords locally. There are three primary functionalities related to this app:
-- Generating key sets
+- Generate key sets
 - Encryptor
 - Decryptor
 
