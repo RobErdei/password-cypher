@@ -31,12 +31,9 @@ The Encryption technique used in this application is a variation of the polygrap
 -Strings that need to be less than 30 characters in length
 -Cannot contain spaces
 -Need to contain characters from the allowed characters table below:
-a	b	c	d	e	f	g	h	i	j	k	l
-m	n	o p	q	r	s	t	u	v	w	x
-y	z	A	B	C	D	E	F	G	H	I	J
-K	L	M	N	O P	Q	R	S	T	U	V
-W	X	Y	Z	!	@	#	$	%	^	&	*
-?	~	0	1	2	3	4	5	6	7	8	9
+
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/ff104d6e-d4ed-4e2f-ab76-8247a58e11b7)
+
 
 
 
