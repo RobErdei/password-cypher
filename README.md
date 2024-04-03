@@ -1,17 +1,17 @@
 This is a TKinter application intended to provide users with a way to safely store passwords locally. There are three primary functionalities related to this app:
-- Generate key sets
-- Encryptor
-- Decryptor
+
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/9991df5e-acbf-49a9-a8d7-d0dba6ea4b12)
 
 # Generate Key Sets and Sequences
 This part of the application randomizes a list of 72 integers (one for each valid character) and into “key sets” which are columns that a character’s positional value can be mapped to. These key sets can then be turned into sequences either manually or through the built-in functionality.
 
-![image](https://github.com/RobErdei/password-cypher/assets/91911762/250f6566-620e-4150-93eb-f87097bb7f95)
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/6da0b260-7a24-439e-9d71-f02ba51689dd)
  
 ## Generating Key Sets:
 To generate these key sets, enter in any of the alphabetical letters displayed in the “Valid Characters” box and the number of sets for each character you would like created. If you only want 2 sets created for the characters “ABC”, the CSV output would have 6 columns in total with the headers being A0, A1, B0, B1, C0 and C1 with each column having a uniquely randomized order of integer placements (character reassignments).
 ## Randomizing Existing sets
 Enter the number of sequences (an order of key sets as a single string) to be created and the number of keys to be randomly selected from the input. Both input values for this part of the page are **integer values only**. This functionality will request for you to upload a csv in the same format/layout as the one that is generated.
+
 ### Example Input:
 - Sequences to be generated: 3
 - Number of Keys to Use: 2
@@ -20,10 +20,12 @@ Enter the number of sequences (an order of key sets as a single string) to be cr
 - C1A0
 - A0B0
 
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/feeed16c-a820-40cc-b6ef-8b14708891c7)
+
 # Encrypting
 The Encryption technique used in this application is a variation of the polygraphic cipher and the permutation cipher in that an inputted string of characters is passed through one or more sets of integer keys that reassign that character’s positional values to the location of that character in the new set(s).
 
-![image](https://github.com/RobErdei/password-cypher/assets/91911762/3da08acb-1a7b-4071-89d7-1b87ac9f80eb)
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/6b266cbd-4db7-43e3-a83a-80909cf3c797)
  
 ## Password Requirements:
  + Strings that need to be less than 30 characters in length
@@ -47,11 +49,13 @@ The Encryption technique used in this application is a variation of the polygrap
 - The outputted fields should be stored for stress-free decryption later on down the line as both sequence and salt are required for decryption. 
 - If the option is ticked before executing, the user will be prompted to select a folder destination and a name for their output file. 
 
-![image](https://github.com/RobErdei/password-cypher/assets/91911762/4fc05cce-b16d-4ead-9914-e1fd9a374d20)
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/a1683a86-2f50-4c17-af97-7b8e533fe9e6)
 
 
 # Decrypting
 The decryption process works similarly to the encryption process with the key difference (no pun intended) being that it requires the salt in order to undo the encryption.
+
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/077c5e66-8469-45cd-bc53-8ab3bfc1292a)
  
 ## Sequence:
 - Since the encryptor reads the sequence order from left-to-right, the decryptor reverses the process by passing the password string through key sets from right-to-left.
@@ -60,6 +64,6 @@ The decryption process works similarly to the encryption process with the key di
 ## Output:
 - The output view consists of the inputted sequences, salt strings and their respective decrypted password strings
 
-![image](https://github.com/RobErdei/password-cypher/assets/91911762/d99c9d8f-6e17-4cbf-a16b-85ec930744ac)
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/8185e407-e20a-4815-a89b-c1b521b5a1c9)
 
  
