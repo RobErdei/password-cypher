@@ -1,5 +1,5 @@
 This is a TKinter application intended to provide users with a way to safely store passwords locally. There are three primary functionalities related to this app:
-- Generating key sets
+- Generate key sets
 - Encryptor
 - Decryptor
 
@@ -59,4 +59,7 @@ The decryption process works similarly to the encryption process with the key di
 - The salt is removed from the string by searching for and removing only the salt characters from the final string to reveal the original password
 ## Output:
 - The output view consists of the inputted sequences, salt strings and their respective decrypted password strings
+
+![image](https://github.com/RobErdei/password-cypher/assets/91911762/d99c9d8f-6e17-4cbf-a16b-85ec930744ac)
+
  
