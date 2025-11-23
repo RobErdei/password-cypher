@@ -1,0 +1,22 @@
+{
+    "colorScheme": {
+        "Table Header Color" : ["#F8A87C"],
+        "Label Color" : ["#FAA312"],
+        "Background" : ["#12213E"],
+        "Button Color" : ["#8FCAE4"],
+        "Checkmark Foreground" : ["#33C481"],
+
+        "Valid Characters Table" : ["#E9D7A9"],
+
+        "Text Color" : ["black"],
+        "Text Font" : ["Consolas"]
+    },
+    
+    "buttonCriteria": {
+        "Per-app Size" : [18, 9],
+        "Per-app Font Size" : [10],
+
+        "Main Hub Size" : [25, 5],
+        "Main Hub Font Size" : [15]
+    }
+}
